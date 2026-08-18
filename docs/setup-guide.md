@@ -136,6 +136,13 @@ Add the Gmail MCP server configuration to your Antigravity config file:
 - **Linux / macOS**: `~/.gemini/config/mcp_config.json`
 - **Windows**: `C:\Users\<YourUsername>\.gemini\config\mcp_config.json`
 
+**To open and edit `mcp_config.json` in Windows PowerShell:**
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.gemini\config"
+notepad "$env:USERPROFILE\.gemini\config\mcp_config.json"
+```
+
+**JSON Content:**
 ```json
 {
   "mcpServers": {
@@ -150,6 +157,7 @@ Add the Gmail MCP server configuration to your Antigravity config file:
 }
 ```
 *(Note for Windows: Use double backslashes `\\` in JSON paths).*
+
 
 ---
 
