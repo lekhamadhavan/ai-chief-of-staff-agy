@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# User Data (AI Chief of Staff persistent context - runtime data)
+cos-data/*.yaml
+cos-data/contacts/*.yaml
+cos-data/cache/*.yaml
+!cos-data/.gitkeep
+!cos-data/contacts/.gitkeep
+!cos-data/cache/.gitkeep
+
+# Antigravity IDE / System
+.DS_Store
+.vscode/
+.idea/
