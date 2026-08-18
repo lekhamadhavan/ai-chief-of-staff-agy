@@ -86,36 +86,55 @@ This creates the `cos-data/` directory with:
 
 ## 🔐 Step 4: Install Credentials & Run One-Time Auth
 
-On the target machine, run:
+### 1. Position Credentials File
+
+**On Linux / macOS:**
+```bash
+mkdir -p ~/.gmail-mcp
+mv ~/Downloads/client_secret_*.json ~/.gmail-mcp/gcp-oauth.keys.json
+```
+
+**On Windows (PowerShell):**
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.gmail-mcp"
+Move-Item "$env:USERPROFILE\Downloads\client_secret_*.json" "$env:USERPROFILE\.gmail-mcp\gcp-oauth.keys.json" -Force
+```
+
+---
+
+### 2. Run OAuth Authentication
+
+Choose one of the authentication options below:
+
+#### Option A: Strictly Read-Only Auth (Recommended)
+Requests **ONLY** `gmail.readonly` and `calendar.readonly` (no write, compose, or send permissions):
 
 ```bash
-# 1. Create credentials directory
-mkdir -p ~/.gmail-mcp
+# Windows (PowerShell) or Linux/macOS
+python -m cos_core.connectors.google_auth_login
+```
 
-# 2. Move the downloaded JSON secret (replace filename with actual downloaded file)
-mv ~/Downloads/client_secret_*.json ~/.gmail-mcp/gcp-oauth.keys.json
-
-# 3. Run the one-time authentication command
-cd ai-chief-of-staff
+#### Option B: standard MCP Auth Server
+```bash
 npx -y @gongrzhe/server-gmail-autoauth-mcp auth
 ```
 
 **In your browser**:
-1. Open the URL generated in the terminal.
+1. Open the URL generated in the terminal (or complete browser sign-in).
 2. Sign in with the authorized Google account.
-3. If prompted with *"App isn't verified"*, click **Continue**.
-4. Review the two requested permissions:
-   - ✅ View email messages and settings (`gmail.readonly`)
-   - ✅ View calendars (`calendar.readonly`)
-5. Click **Allow**.
-6. Terminal will output: **`Authentication completed successfully`**.
-7. The active OAuth token is saved to `~/.gmail-mcp/credentials.json`.
+3. If prompted with *"App isn't verified"*, click **Advanced** → **Go to AI Chief of Staff (unsafe)**.
+4. Review requested permissions (`gmail.readonly` and `calendar.readonly`) and click **Allow**.
+5. Terminal will output: **`Authentication completed successfully`**.
+6. Token is saved to `~/.gmail-mcp/credentials.json` (or `%USERPROFILE%\.gmail-mcp\credentials.json` on Windows).
 
 ---
 
 ## 🛠️ Step 5: Configure Antigravity MCP Server (Optional)
 
-Add the Gmail MCP server configuration to `~/.gemini/config/mcp_config.json`:
+Add the Gmail MCP server configuration to your Antigravity config file:
+
+- **Linux / macOS**: `~/.gemini/config/mcp_config.json`
+- **Windows**: `C:\Users\<YourUsername>\.gemini\config\mcp_config.json`
 
 ```json
 {
@@ -124,12 +143,13 @@ Add the Gmail MCP server configuration to `~/.gemini/config/mcp_config.json`:
       "command": "npx",
       "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
       "env": {
-        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp/credentials.json"
+        "GMAIL_CREDENTIALS_PATH": "C:\\Users\\<YourUsername>\\.gmail-mcp\\credentials.json"
       }
     }
   }
 }
 ```
+*(Note for Windows: Use double backslashes `\\` in JSON paths).*
 
 ---
 
@@ -147,11 +167,11 @@ Type any of these directly into the prompt box:
 
 ### Option B: Using Terminal CLI
 ```bash
+# Linux/macOS
 python3 -m cos_core.orchestration.cli morning-briefing
-python3 -m cos_core.orchestration.cli inbox-triage
-python3 -m cos_core.orchestration.cli meeting-prep
-python3 -m cos_core.orchestration.cli weekly-briefing
-python3 -m cos_core.orchestration.cli relationship-audit
+
+# Windows (PowerShell)
+python -m cos_core.orchestration.cli morning-briefing
 ```
 
 ---
@@ -160,7 +180,10 @@ python3 -m cos_core.orchestration.cli relationship-audit
 
 | Issue | Solution |
 |:---|:---|
-| `ModuleNotFoundError: No module named 'pydantic'` | Run `python3 -m pip install -e .` inside project root |
-| `HTTP Error 401: Unauthorized` | Re-run `npx -y @gongrzhe/server-gmail-autoauth-mcp auth` to refresh credentials |
+| `ModuleNotFoundError: No module named 'pydantic'` | Run `python -m pip install -e .` inside project root |
+| `npx : cannot be loaded... execution policy` (Windows) | Run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` in PowerShell |
+| `npx : command not found` | Install Node.js via `winget install OpenJS.NodeJS.LTS` then restart PowerShell |
+| `HTTP Error 401: Unauthorized` | Re-run `python -m cos_core.connectors.google_auth_login` to refresh credentials |
 | Redirect URI Mismatch | Ensure `http://localhost:3000/oauth2callback` is exact in Google Cloud Console |
 | No live emails appearing | Ensure test user email in Google Cloud Consent Screen matches the logged-in email |
+
